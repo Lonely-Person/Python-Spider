@@ -22,13 +22,15 @@ import json
 
 
 def get_data(url, headers, params):
-    html = requests.get(url, headers=headers, params=params, timeout=10)
+    html = requests.get(url, headers=headers, params=params, timeout=15)
     if html.status_code == 200:
         data = html.text
         data = json.loads(data)
         data = data["data"]
+        count = data["count"]
         stocks = data["list"]
-        print(data)
+        print(stocks)
+        return count
 
 
 def main():
@@ -47,7 +49,12 @@ def main():
         "type": "sh_sz",
         "_": 2000000000000,
     }
-    get_data(url, headers, params)
+    count = get_data(url, headers, params)  # 股票个数，这个数值不变
+    if count > 60:
+        end_page = count//60 + (count % 60 != 0)  # 有余数则+1
+        for page in range(2, end_page+1):
+            params["page"] = page
+            get_data(url, headers, params)
 
 
 if __name__ == '__main__':
