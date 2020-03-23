@@ -4,5 +4,4 @@
 
 
 ### 一、股票类爬虫
-
-​    * [雪球网](https://xueqiu.com)
+* [雪球网](https://xueqiu.com)
