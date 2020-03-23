@@ -4,10 +4,11 @@
 import requests
 from pyquery.pyquery import PyQuery
 import json
+from utils.todatabase import ToDatabase
 
 """
 门面网址：https://xueqiu.com/hq#
-但是数据并不来源于此，通过js请求另一个接口加载的数据
+但是数据并不来源于此，通过js请求另一个接口加载的数据，返回json数据
     https://xueqiu.com/service/v5/stock/screener/quote/list
     参数如下：
         page: 1
@@ -21,7 +22,7 @@ import json
 """
 
 
-def get_data(url, headers, params):
+def get_data(url, headers, params, conn):
     html = requests.get(url, headers=headers, params=params, timeout=15)
     if html.status_code == 200:
         data = html.text
@@ -30,6 +31,7 @@ def get_data(url, headers, params):
         count = data["count"]
         stocks = data["list"]
         print(stocks)
+        conn.insert_many(stocks)
         return count
 
 
@@ -49,12 +51,17 @@ def main():
         "type": "sh_sz",
         "_": 2000000000000,
     }
-    count = get_data(url, headers, params)  # 股票个数，这个数值不变
+    # 连接数据库
+    database = ToDatabase(dbname="XueQiu", collection="HuShenYiLan")
+    conn = database.get_mongo()
+
+    count = get_data(url, headers, params, conn)  # 股票个数，这个数值不变
     if count > 60:
         end_page = count//60 + (count % 60 != 0)  # 有余数则+1
         for page in range(2, end_page+1):
             params["page"] = page
-            get_data(url, headers, params)
+            get_data(url, headers, params, conn)
+    print("完成！")
 
 
 if __name__ == '__main__':
