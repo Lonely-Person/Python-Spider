@@ -49,7 +49,7 @@ def get_jobs(search_content, page):
 
 
 def main(search_content):
-    for page in range(30):
+    for page in range(30):  # 这里并不确定到底有多少页
         get_jobs(search_content, page)
         print(search_content)
 
